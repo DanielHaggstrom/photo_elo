@@ -76,6 +76,9 @@ def show_images(pair, fig, axs):
     axs[0].set_title(f"A - {pair[0]}", fontsize=10, loc="center")
     axs[1].set_title(f"D - {pair[1]}", fontsize=10, loc="center")
 
+    # Add general instructions
+    fig.suptitle("Press A (left) | D (right) | E (exit) | R (rankings)", fontsize=12)
+
     # Redraw the canvas
     fig.canvas.draw()
 
@@ -91,14 +94,46 @@ def next_pair():
         print("Not enough images to display a pair.")
 
 
+def show_rankings():
+    """Opens a new window displaying the top 3 images and their rankings."""
+    global elo_rankings
+
+    sorted_rankings = sorted(elo_rankings.items(), key=lambda x: x[1], reverse=True)
+    top_images = sorted_rankings[:3]  # Top 3 ranked images
+
+    if not top_images:
+        print("No images ranked yet.")
+        return
+
+    # Create new figure with 4 subplots: 1 for text rankings, 3 for top images
+    fig_rank, axs_rank = plt.subplots(1, 4, figsize=(15, 6), gridspec_kw={'width_ratios': [1, 2, 2, 2]})
+
+    # Left panel: Show rankings as text
+    ranking_text = "\n".join(f"{img}: {score:.1f}" for img, score in sorted_rankings[:10])
+    axs_rank[0].text(0.5, 0.5, ranking_text, fontsize=12, ha="center", va="center")
+    axs_rank[0].axis("off")
+    axs_rank[0].set_title("Top Rankings", fontsize=14)
+
+    # Right panel: Show top 3 images
+    for i, (img_file, score) in enumerate(top_images):
+        img = mpimg.imread(os.path.join(directory, img_file))
+        axs_rank[i + 1].imshow(img)
+        axs_rank[i + 1].set_title(f"{i+1}. {img_file} ({score:.1f})", fontsize=12)
+        axs_rank[i + 1].axis("off")
+
+    plt.show()
+
+
 def on_key(event):
-    """Handles keyboard input for voting."""
+    """Handles keyboard input for voting and opening rankings."""
     if event.key in ["a", "d"]:
         winner, loser = (current_pair[0], current_pair[1]) if event.key == "a" else (current_pair[1], current_pair[0])
         update_ranking(winner, loser)
     elif event.key == "e":
         plt.close(fig)
         save_rankings()
+    elif event.key == "r":
+        show_rankings()
 
 
 # Initialize the GUI
