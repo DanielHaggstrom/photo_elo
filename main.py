@@ -34,7 +34,7 @@ def get_rankings(directory, filename=RANKINGS_FILE):
     rankings = {f: DEFAULT_ELO for f in filenames}
 
     if os.path.exists(filename):
-        with open(filename, "r") as file:
+        with open(filename, "r", encoding='utf-8') as file:
             for line in file:
                 name, score = line.strip().split(":")
                 if name in filenames:
@@ -71,6 +71,7 @@ def show_images(pair):
     """Displays the given image pair in the same Matplotlib window, auto-correcting orientation."""
     global fig, axs, current_pair
     current_pair = pair
+    print(f'Showing images {pair[0]} and {pair[1]}')
 
     for i, img_file in enumerate(pair):
         img_path = os.path.join(directory, img_file)
@@ -118,7 +119,7 @@ def update_ranking(winner, loser):
 def save_rankings():
     """Saves Elo rankings to file."""
     sorted_rankings = sorted(elo_rankings.items(), key=lambda x: x[1], reverse=True)
-    with open(RANKINGS_FILE, "w") as file:
+    with open(RANKINGS_FILE, "w", encoding='utf-8') as file:
         for filename, ranking in sorted_rankings:
             file.write(f"{filename}:{ranking}\n")
 
